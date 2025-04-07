@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vishu vs Ashwin - Level Game</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive;
+      background: linear-gradient(to bottom right, #ffe0f0, #fff0f5);
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #d63384;
+    }
+
+    .avatars {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 60px;
+      margin-bottom: 20px;
+      font-size: 100px;
+    }
+
+    .vishu, .ashwin {
+      transition: transform 0.3s ease;
+    }
+
+    .vishu.punch {
+      transform: rotate(-20deg) scale(1.2);
+    }
+
+    .ashwin.hit {
+      transform: scale(0.8) rotate(10deg);
+    }
+
+    .meter {
+      position: relative;
+      width: 400px;
+      height: 30px;
+      background: #ddd;
+      margin: 0 auto 20px;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .green-zone {
+      position: absolute;
+      width: 80px;
+      height: 100%;
+      background: #8df58d;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .line {
+      position: absolute;
+      width: 4px;
+      height: 100%;
+      background: white;
+      left: 0;
+    }
+
+    button {
+      font-size: 24px;
+      padding: 10px 20px;
+      background: #ff69b4;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    .result {
+      font-size: 24px;
+      margin-top: 20px;
+      color: #333;
+    }
+
+    .lives {
+      margin-top: 10px;
+      font-size: 22px;
+    }
+
+    .level {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🥊 Vishu vs Ashwin - Sherni Challenge 🥊</h1>
+  <div class="level" id="level">Level: 1</div>
+
+  <div class="avatars">
+    <div class="vishu" id="vishu">👧🥊</div>
+    <div class="ashwin" id="ashwin">🥊👦</div>
+  </div>
+
+  <div class="meter">
+    <div class="green-zone"></div>
+    <div class="line" id="line"></div>
+  </div>
+
+  <button onclick="checkPunch()" id="punchBtn">👊 TAP TO PUNCH</button>
+  <button onclick="restartGame()" id="restartBtn" style="display:none;">🔁 Restart</button>
+
+  <div class="result" id="result">Tap when the line is in the green zone!</div>
+  <div class="lives" id="lives">Lives Left: 6 | Punches Landed: 0</div>
+
+  <script>
+    const line = document.getElementById("line");
+    const result = document.getElementById("result");
+    const livesText = document.getElementById("lives");
+    const levelText = document.getElementById("level");
+    const punchBtn = document.getElementById("punchBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const vishu = document.getElementById("vishu");
+    const ashwin = document.getElementById("ashwin");
+
+    let pos = 0;
+    let direction = 2;
+    let interval;
+    let lives = 6;
+    let hits = 0;
+    let speed = 8;
+    let level = 1;
+    let punchesToWin = 10;
+
+    function animateLine() {
+      clearInterval(interval);
+      interval = setInterval(() => {
+        pos += direction;
+        if (pos >= 396 || pos <= 0) direction *= -1;
+        line.style.left = pos + "px";
+      }, speed);
+    }
+
+    function punchEffect(success) {
+      vishu.classList.add("punch");
+      if (success) ashwin.classList.add("hit");
+
+      setTimeout(() => {
+        vishu.classList.remove("punch");
+        ashwin.classList.remove("hit");
+      }, 300);
+    }
+
+    function checkPunch() {
+      const greenStart = 160;
+      const greenEnd = 240;
+
+      if (pos >= greenStart && pos <= greenEnd) {
+        punchEffect(true);
+        hits++;
+        result.textContent = "💥 Vishu landed a punch!";
+        result.style.color = "green";
+
+        direction += 0.5;
+        speed = Math.max(2, speed - 0.6);
+        animateLine();
+      } else {
+        punchEffect(false);
+        lives--;
+        result.textContent = "🥴 Ashwin dodged and countered!";
+        result.style.color = "red";
+      }
+
+      if (hits === punchesToWin) {
+        result.textContent = `👑 Vishu you won level ${level} sherni 🐯💖`;
+        result.style.color = "#d63384";
+        clearInterval(interval);
+        punchBtn.disabled = true;
+        restartBtn.style.display = "inline-block";
+      } else if (lives === 0) {
+        result.textContent = "💀 Game Over! Ashwin wins!";
+        clearInterval(interval);
+        punchBtn.disabled = true;
+        restartBtn.style.display = "inline-block";
+      }
+
+      livesText.textContent = `Lives Left: ${lives} | Punches Landed: ${hits}`;
+    }
+
+    function restartGame() {
+      level++;
+      lives = 6;
+      hits = 0;
+      direction = 2;
+      speed = Math.max(2, 8 - level); // slightly faster each level
+      punchesToWin = 10;
+      result.textContent = "Tap when the line is in the green zone!";
+      result.style.color = "#333";
+      punchBtn.disabled = false;
+      restartBtn.style.display = "none";
+      livesText.textContent = `Lives Left: ${lives} | Punches Landed: ${hits}`;
+      levelText.textContent = `Level: ${level}`;
+      animateLine();
+    }
+
+    animateLine();
+  </script>
+
+</body>
+</html>
